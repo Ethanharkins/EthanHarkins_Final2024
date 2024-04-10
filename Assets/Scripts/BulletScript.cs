@@ -2,24 +2,19 @@ using UnityEngine;
 
 public class BulletScript : MonoBehaviour
 {
-    public GameObject explosionEffectPrefab;
-    public float lifetime = 5f;
+    public GameObject explosionEffectPrefab; // Assign a prefab for the explosion effect in the inspector
 
-    private void Start()
+    private void OnCollisionEnter(Collision collision)
     {
-        // Destroy the bullet after a set lifetime to clean up
-        Destroy(gameObject, lifetime);
-    }
-
-    private void OnCollisionEnter(Collision other)
-    {
-        // Instantiate explosion effect at the bullet's position and rotation
-        if (explosionEffectPrefab != null)
+        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground")) // Make sure your ground objects are on the "Ground" layer
         {
-            Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
-        }
+            if (explosionEffectPrefab != null)
+            {
+                GameObject effect = Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+                Destroy(effect, 2f); // Adjust time as needed for the effect's duration
+            }
 
-        // Destroy the bullet to simulate it exploding
-        Destroy(gameObject);
+            Destroy(gameObject); // Destroy the bullet
+        }
     }
 }

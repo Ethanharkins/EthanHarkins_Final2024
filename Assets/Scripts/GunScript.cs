@@ -5,20 +5,22 @@ public class GunScript : MonoBehaviour
     public GameObject bulletPrefab;
     public Transform bulletSpawnPoint;
     public float bulletForce = 20f;
-    public float recoilForce = 2f;
-    private CharacterController characterController;
+    public ParticleSystem muzzleFlashEffect;
     private Transform playerCamera;
 
     private void Start()
     {
-        characterController = GetComponentInParent<CharacterController>();
         playerCamera = Camera.main.transform;
+        // Adjust the gun's initial rotation to match the camera's if necessary
+        transform.rotation = Quaternion.Euler(0, playerCamera.eulerAngles.y, 0);
     }
 
-    // Update is called once per frame
-    void Update()
+    private void Update()
     {
-        // Replace "Fire1" with your actual input for shooting if different
+        // Align the gun correctly with the camera direction
+        // This assumes the gun's forward vector points along the barrel
+        transform.rotation = Quaternion.Euler(playerCamera.eulerAngles.x, playerCamera.eulerAngles.y, 0);
+
         if (Input.GetButtonDown("Fire1"))
         {
             Shoot();
@@ -27,24 +29,14 @@ public class GunScript : MonoBehaviour
 
     private void Shoot()
     {
-        // Instantiate the bullet
-        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+        if (muzzleFlashEffect != null)
+        {
+            muzzleFlashEffect.Play();
+        }
+
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity);
         Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
-
-        // Apply force to the bullet
-        bulletRb.AddForce(bulletSpawnPoint.forward * bulletForce, ForceMode.Impulse);
-
-        // Apply recoil/knockback to the player
-        ApplyRecoil();
-    }
-
-    private void ApplyRecoil()
-    {
-        // Calculate the opposite direction of where the player is looking
-        Vector3 recoilDirection = -playerCamera.forward * recoilForce;
-
-        // Apply a force to the player in the opposite direction
-        // We use SimpleMove here for demonstration, but you might need to adjust this to fit your character controller logic
-        characterController.SimpleMove(recoilDirection);
+        Vector3 shootDirection = playerCamera.forward;
+        bulletRb.AddForce(shootDirection * bulletForce, ForceMode.Impulse);
     }
 }

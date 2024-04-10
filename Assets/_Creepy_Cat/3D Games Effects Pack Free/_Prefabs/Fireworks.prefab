@@ -4787,7 +4787,7 @@ GameObject:
   m_Component:
   - component: {fileID: 485360}
   m_Layer: 0
-  m_Name: Effect_08
+  m_Name: Fireworks
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
