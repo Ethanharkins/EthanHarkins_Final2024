@@ -22,7 +22,7 @@ public class PauseMenu : MonoBehaviour
         }
     }
 
-    public void Resume()
+    public void Resume() // Make sure this is public
     {
         pauseMenuUI.SetActive(false);
         Time.timeScale = 1f; // Resume game time
@@ -30,7 +30,7 @@ public class PauseMenu : MonoBehaviour
         overlayUI.SetActive(true); // Reactivate the overlay UI
     }
 
-    void Pause()
+    public void Pause() // Make sure this is public
     {
         pauseMenuUI.SetActive(true);
         Time.timeScale = 0f; // Pause game time

@@ -5,25 +5,21 @@ public class GunScript : MonoBehaviour
     public GameObject bulletPrefab;
     public Transform bulletSpawnPoint;
     public float bulletForce = 20f;
-    public ParticleSystem muzzleFlashEffect;
-    private Transform playerCamera;
+    public ParticleSystem muzzleFlashEffect; // Optional: for visual effects
+    private StarterAssets.StarterAssetsInputs input;
 
     private void Start()
     {
-        playerCamera = Camera.main.transform;
-        // Adjust the gun's initial rotation to match the camera's if necessary
-        transform.rotation = Quaternion.Euler(0, playerCamera.eulerAngles.y, 0);
+        // Assumes the StarterAssetsInputs component is on the same GameObject as this script or a parent GameObject.
+        input = GetComponentInParent<StarterAssets.StarterAssetsInputs>();
     }
 
     private void Update()
     {
-        // Align the gun correctly with the camera direction
-        // This assumes the gun's forward vector points along the barrel
-        transform.rotation = Quaternion.Euler(playerCamera.eulerAngles.x, playerCamera.eulerAngles.y, 0);
-
-        if (Input.GetButtonDown("Fire1"))
+        if (input.shoot)
         {
             Shoot();
+            input.shoot = false; // Reset the shoot input if it's handled as a one-time trigger
         }
     }
 
@@ -31,12 +27,11 @@ public class GunScript : MonoBehaviour
     {
         if (muzzleFlashEffect != null)
         {
-            muzzleFlashEffect.Play();
+            muzzleFlashEffect.Play(); // Play muzzle flash effect
         }
 
         GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity);
         Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
-        Vector3 shootDirection = playerCamera.forward;
-        bulletRb.AddForce(shootDirection * bulletForce, ForceMode.Impulse);
+        bulletRb.AddForce(bulletSpawnPoint.forward * bulletForce, ForceMode.Impulse);
     }
 }
