@@ -12,7 +12,7 @@ namespace StarterAssets
         public Vector2 look;
         public bool jump;
         public bool sprint;
-        public bool shoot; // Added for shooting
+        public bool shoot; // Added for shooting input
 
         [Header("Movement Settings")]
         public bool analogMovement;
@@ -50,7 +50,45 @@ namespace StarterAssets
         {
             ShootInput(value.isPressed);
         }
+
+        // Added for pause functionality
+        public void OnPauseGame(InputValue value)
+        {
+            if (value.isPressed)
+            {
+                // Toggle pause state
+                if (PauseMenu.GameIsPaused)
+                {
+                    FindObjectOfType<PauseMenu>().Resume();
+                }
+                else
+                {
+                    FindObjectOfType<PauseMenu>().Pause();
+                }
+            }
+        }
 #endif
+        // In your script that's responsible for handling input (e.g., attached to the same GameObject as PlayerInput)
+
+        private void Awake()
+        {
+            var playerInput = GetComponent<PlayerInput>();
+            var pauseAction = playerInput.actions["Pause"];
+            pauseAction.performed += _ => TogglePause();
+        }
+
+        private void TogglePause()
+        {
+            // Toggle pause state
+            if (PauseMenu.GameIsPaused)
+            {
+                FindObjectOfType<PauseMenu>().Resume();
+            }
+            else
+            {
+                FindObjectOfType<PauseMenu>().Pause();
+            }
+        }
 
         public void MoveInput(Vector2 newMoveDirection)
         {
@@ -72,7 +110,7 @@ namespace StarterAssets
             sprint = newSprintState;
         }
 
-        // Added method for shooting input
+        // Method for shooting input
         public void ShootInput(bool newShootState)
         {
             shoot = newShootState;

@@ -2,19 +2,20 @@ using UnityEngine;
 
 public class BulletScript : MonoBehaviour
 {
-    public GameObject explosionEffectPrefab; // Assign a prefab for the explosion effect in the inspector
+    public GameObject explosionEffectPrefab; // Assign this in the Inspector
+
+    private void Start()
+    {
+        Destroy(gameObject, 5f); // Optional: safety to ensure bullets don't live forever
+    }
 
     private void OnCollisionEnter(Collision collision)
     {
-        if (collision.gameObject.layer == LayerMask.NameToLayer("Ground")) // Make sure your ground objects are on the "Ground" layer
-        {
-            if (explosionEffectPrefab != null)
-            {
-                GameObject effect = Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
-                Destroy(effect, 2f); // Adjust time as needed for the effect's duration
-            }
+        // Assuming explosionEffectPrefab is your particle effect GameObject
+        GameObject effectInstance = Instantiate(explosionEffectPrefab, transform.position, Quaternion.identity);
+        Destroy(effectInstance, 1.8f); // Destroy the effect after 3 seconds
 
-            Destroy(gameObject); // Destroy the bullet
-        }
+        Destroy(gameObject); // Destroy the bullet itself immediately
     }
+
 }

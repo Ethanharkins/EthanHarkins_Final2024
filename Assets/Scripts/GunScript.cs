@@ -1,37 +1,74 @@
 using UnityEngine;
+using UnityEngine.InputSystem;
 
 public class GunScript : MonoBehaviour
 {
     public GameObject bulletPrefab;
     public Transform bulletSpawnPoint;
     public float bulletForce = 20f;
-    public ParticleSystem muzzleFlashEffect; // Optional: for visual effects
-    private StarterAssets.StarterAssetsInputs input;
+    private InputAction shootAction;
+    public Rigidbody playerRigidbody; // Assign this in the inspector
+    public float knockbackForce = 5f;
 
-    private void Start()
+    private void Awake()
     {
-        // Assumes the StarterAssetsInputs component is on the same GameObject as this script or a parent GameObject.
-        input = GetComponentInParent<StarterAssets.StarterAssetsInputs>();
-    }
-
-    private void Update()
-    {
-        if (input.shoot)
+        var playerInput = GetComponent<PlayerInput>();
+        if (playerInput != null)
         {
-            Shoot();
-            input.shoot = false; // Reset the shoot input if it's handled as a one-time trigger
+            shootAction = playerInput.actions["Shoot"];
         }
     }
 
+    private void OnEnable()
+    {
+        if (shootAction != null)
+        {
+            shootAction.performed += OnShootPerformed;
+        }
+    }
+
+    private void OnDisable()
+    {
+        if (shootAction != null)
+        {
+            shootAction.performed -= OnShootPerformed;
+        }
+    }
+
+    private void OnShootPerformed(InputAction.CallbackContext context)
+    {
+        Shoot(); // Make sure this method is correctly defined in this class
+    }
+
+    // This is the Shoot method that must exist in your GunScript for everything to work
     private void Shoot()
     {
-        if (muzzleFlashEffect != null)
+        Debug.Log("Shoot called");
+        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, bulletSpawnPoint.rotation);
+        Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
+
+        Debug.Log($"Bullet instantiated at {bullet.transform.position}, with useGravity = {bulletRb.useGravity}");
+
+        if (bulletRb != null)
         {
-            muzzleFlashEffect.Play(); // Play muzzle flash effect
+            bulletRb.useGravity = false; // Explicitly disable gravity here as well
+            bulletRb.AddForce(bulletSpawnPoint.forward * bulletForce, ForceMode.Impulse);
+            Debug.Log($"Adding force: {bulletSpawnPoint.forward * bulletForce}");
+        }
+        else
+        {
+            Debug.LogError("Bullet prefab is missing a Rigidbody component.");
         }
 
-        GameObject bullet = Instantiate(bulletPrefab, bulletSpawnPoint.position, Quaternion.identity);
-        Rigidbody bulletRb = bullet.GetComponent<Rigidbody>();
-        bulletRb.AddForce(bulletSpawnPoint.forward * bulletForce, ForceMode.Impulse);
+        // Knockback
+        Vector3 knockbackDirection = -transform.forward;
+        playerRigidbody.AddForce(knockbackDirection * knockbackForce, ForceMode.Impulse);
+        if (PauseMenu.GameIsPaused)
+        {
+            Debug.Log("Game is paused - cannot shoot.");
+            return; // Exit the method early
+        }
     }
+
+
 }
